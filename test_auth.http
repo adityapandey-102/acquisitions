@@ -1,0 +1,78 @@
+### Test the acquisitions API authentication endpoints
+
+### 1. Health check
+GET http://localhost:3000/health
+
+###
+
+### 2. Sign up a new user
+POST http://localhost:3000/api/auth/sign-up
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "securepassword123",
+  "role": "user"
+}
+
+###
+
+### 3. Sign in with the user
+POST http://localhost:3000/api/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "securepassword123"
+}
+
+###
+
+### 4. Sign in with wrong password (should fail)
+POST http://localhost:3000/api/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "wrongpassword"
+}
+
+###
+
+### 5. Sign in with non-existent user (should fail)
+POST http://localhost:3000/api/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "nonexistent@example.com",
+  "password": "anypassword"
+}
+
+###
+
+### 6. Sign out
+POST http://localhost:3000/api/auth/sign-out
+
+###
+
+### 7. Test validation errors - invalid email format
+POST http://localhost:3000/api/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "invalid-email",
+  "password": "password123"
+}
+
+###
+
+### 8. Test validation errors - missing password
+POST http://localhost:3000/api/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+
+###

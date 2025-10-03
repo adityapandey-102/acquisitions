@@ -5,7 +5,8 @@ import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from '#routes/auth.routes.js';
-import securityMiddleware from '#middleware/security.middleware.js'
+import securityMiddleware from '#middleware/security.middleware.js';
+import { healthCheck } from '#config/database.js';
 
 const app = express();
 
@@ -24,8 +25,30 @@ app.get('/', (req, res) => {
   res.status(200).send('Hello from Acquisitions!');
 });
 
-app.get('/health',(req,res)=>{
-  res.status(200).json({status:'OK',timestamp: new Date().toISOString(), uptime: process.uptime()});
+app.get('/health', async (req,res)=>{
+  try {
+    const dbHealth = await healthCheck();
+    const isHealthy = dbHealth.status === 'healthy';
+    
+    const healthStatus = {
+      status: isHealthy ? 'OK' : 'DEGRADED',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'unknown',
+      database: dbHealth
+    };
+    
+    res.status(isHealthy ? 200 : 503).json(healthStatus);
+  } catch (error) {
+    logger.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'ERROR',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'unknown',
+      error: 'Health check failed'
+    });
+  }
 });
 
 app.get('/api',(req,res)=>{

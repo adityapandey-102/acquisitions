@@ -2,8 +2,8 @@ import logger from '#config/logger.js';
 import { createUser, authenticateUser } from '#services/auth.service.js';
 import { formValidationError } from '#utils/format.js';
 import { signupSchema, signinSchema } from '#validations/auth.validation.js';
-import {jwtToken} from '#utils/jwt.js';
-import {cookies} from '#utils/cookies.js';
+import { jwtToken } from '#utils/jwt.js';
+import { cookies } from '#utils/cookies.js';
 
 export const signup = async (req, res, next) => {
   try {
@@ -18,10 +18,14 @@ export const signup = async (req, res, next) => {
     const { name, email, role, password } = validationResult.data;
 
     // AUTH SERVICE
-    const user = await createUser({name, email, password, role});
+    const user = await createUser({ name, email, password, role });
 
     // Create Token
-    const token = jwtToken.sign({id: user.id, email:user.email, role:user.role});
+    const token = jwtToken.sign({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     cookies.set(res, 'token', token);
 
@@ -61,7 +65,11 @@ export const signin = async (req, res, next) => {
     const user = await authenticateUser({ email, password });
 
     // Create Token
-    const token = jwtToken.sign({ id: user.id, email: user.email, role: user.role });
+    const token = jwtToken.sign({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     cookies.set(res, 'token', token);
 
@@ -88,14 +96,14 @@ export const signout = async (req, res, next) => {
   try {
     // Get the token from cookies to log which user is signing out
     const token = cookies.get(req, 'token');
-    
+
     if (token) {
       try {
         const decoded = jwtToken.verify(token);
         logger.info(`User signed out successfully: ${decoded.email}`);
-      } catch (tokenError) {
+      } catch (e) {
         // Token might be invalid/expired, but we still want to clear the cookie
-        logger.info('User signed out (invalid/expired token cleared)');
+        logger.info('User signed out (invalid/expired token cleared)',e);
       }
     } else {
       logger.info('User signed out (no token found)');

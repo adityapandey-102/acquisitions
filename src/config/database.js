@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'development') {
 // Validate DATABASE_URL
 if (!process.env.DATABASE_URL) {
   throw new Error(
-    `DATABASE_URL environment variable is required. ` +
+    'DATABASE_URL environment variable is required. ' +
       `Current environment: ${process.env.NODE_ENV || 'unknown'}`
   );
 }

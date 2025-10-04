@@ -35,6 +35,7 @@ jobs:
           npm test
         env:
           NODE_ENV: test
+          ARCJET_ENV: development
           NODE_OPTIONS: --experimental-vm-modules
           DATABASE_URL: ${{ secrets.TEST_DATABASE_URL || 'postgresql://test:test@localhost:5432/test_acquisitions' }}
           JWT_SECRET: test-secret-for-ci

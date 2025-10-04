@@ -103,7 +103,7 @@ export const signout = async (req, res, next) => {
         logger.info(`User signed out successfully: ${decoded.email}`);
       } catch (e) {
         // Token might be invalid/expired, but we still want to clear the cookie
-        logger.info('User signed out (invalid/expired token cleared)',e);
+        logger.info('User signed out (invalid/expired token cleared)', e);
       }
     } else {
       logger.info('User signed out (no token found)');

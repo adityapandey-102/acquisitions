@@ -24,11 +24,13 @@ A Node.js application with Express and Neon Database, containerized for both dev
 2. **Configure environment variables for development:**
 
    Copy the development environment template:
+
    ```bash
    cp .env.development .env.development.local
    ```
 
    Edit `.env.development.local` with your Neon credentials:
+
    ```env
    NEON_API_KEY=your_actual_neon_api_key
    NEON_PROJECT_ID=your_actual_project_id
@@ -38,6 +40,7 @@ A Node.js application with Express and Neon Database, containerized for both dev
    ```
 
    > **Note**: Get these values from your [Neon Console](https://console.neon.tech):
+   >
    > - API Key: Account Settings → API Keys
    > - Project ID: Project Settings → General
    > - Branch ID: Your project's main/default branch ID
@@ -60,6 +63,7 @@ A Node.js application with Express and Neon Database, containerized for both dev
    - API: http://localhost:3000/api
 
 5. **Run database migrations (if needed):**
+
    ```bash
    # In a separate terminal
    docker exec acquisitions-app-dev npm run db:migrate
@@ -75,11 +79,13 @@ A Node.js application with Express and Neon Database, containerized for both dev
 1. **Configure production environment variables:**
 
    Create a production environment file:
+
    ```bash
    cp .env.production .env.production.local
    ```
 
    Edit `.env.production.local` with your production values:
+
    ```env
    DATABASE_URL=postgres://username:password@ep-xxx-xxx.region.neon.tech/acquisitions?sslmode=require
    JWT_SECRET=your_strong_production_jwt_secret
@@ -118,6 +124,7 @@ PARENT_BRANCH_ID=your_parent_branch_id
 ```
 
 Key features:
+
 - Connects to Neon Local proxy at `neon-local:5432`
 - Automatically creates ephemeral branches
 - Enables database query logging
@@ -137,6 +144,7 @@ LOG_LEVEL=info
 ```
 
 Key features:
+
 - Direct connection to Neon Cloud
 - Production-grade security settings
 - Optimized logging levels
@@ -147,6 +155,7 @@ Key features:
 ### Development Database
 
 The development setup uses **Neon Local** which:
+
 - Creates ephemeral branches automatically
 - Branches are deleted when containers stop
 - No manual cleanup required
@@ -155,6 +164,7 @@ The development setup uses **Neon Local** which:
 ### Production Database
 
 Production connects directly to your **Neon Cloud Database**:
+
 - Uses your actual production database
 - Persistent data storage
 - Connection pooling via Neon's serverless driver
@@ -163,6 +173,7 @@ Production connects directly to your **Neon Cloud Database**:
 ### Running Migrations
 
 **Development:**
+
 ```bash
 # Using Docker exec
 docker exec acquisitions-app-dev npm run db:migrate
@@ -172,6 +183,7 @@ docker-compose -f docker-compose.dev.yml exec app npm run db:migrate
 ```
 
 **Production:**
+
 ```bash
 docker-compose -f docker-compose.prod.yml exec app npm run db:migrate
 ```
@@ -179,6 +191,7 @@ docker-compose -f docker-compose.prod.yml exec app npm run db:migrate
 ### Database Studio (Development)
 
 Access Drizzle Studio for database inspection:
+
 ```bash
 docker exec acquisitions-app-dev npm run db:studio
 ```
@@ -231,6 +244,7 @@ docker-compose -f docker-compose.prod.yml down
 ### Common Issues
 
 **1. Neon Local connection issues:**
+
 ```bash
 # Check if Neon Local is healthy
 docker-compose -f docker-compose.dev.yml exec neon-local pg_isready -h localhost -p 5432 -U neon
@@ -240,6 +254,7 @@ docker-compose -f docker-compose.dev.yml logs neon-local
 ```
 
 **2. Application not starting:**
+
 ```bash
 # Check application logs
 docker-compose -f docker-compose.dev.yml logs app
@@ -249,11 +264,13 @@ curl http://localhost:3000/health
 ```
 
 **3. Database connection errors:**
+
 - Verify your `NEON_API_KEY`, `NEON_PROJECT_ID`, and `PARENT_BRANCH_ID` are correct
 - Check your Neon Console for proper branch IDs
 - Ensure your Neon API key has the necessary permissions
 
 **4. Environment variables not loading:**
+
 - Ensure your `.env.development.local` or `.env.production.local` files exist
 - Check that you're using the `--env-file` flag with the correct file path
 - Verify file permissions allow reading
@@ -282,6 +299,7 @@ curl http://localhost:3000/health
 ### Logs and Debugging
 
 **View application logs:**
+
 ```bash
 # Development
 docker-compose -f docker-compose.dev.yml logs -f app
@@ -291,22 +309,25 @@ docker-compose -f docker-compose.prod.yml logs -f app
 ```
 
 **Access container shell:**
+
 ```bash
 # Development
 docker-compose -f docker-compose.dev.yml exec app sh
 
-# Production  
+# Production
 docker-compose -f docker-compose.prod.yml exec app sh
 ```
 
 ## Security Considerations
 
 ### Development
+
 - Uses relaxed CORS settings
 - Database logging enabled
 - Self-signed certificates accepted for Neon Local
 
 ### Production
+
 - Runs as non-root user (nodejs:1001)
 - Read-only root filesystem
 - Resource limits enforced
@@ -317,11 +338,13 @@ docker-compose -f docker-compose.prod.yml exec app sh
 ## Performance Optimization
 
 ### Docker Build Optimization
+
 - Multi-stage builds reduce final image size
 - Layer caching for dependencies
 - `.dockerignore` excludes unnecessary files
 
 ### Runtime Optimization
+
 - Production builds exclude dev dependencies
 - Connection pooling via Neon serverless driver
 - Health checks for container orchestration

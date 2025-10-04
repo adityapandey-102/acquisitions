@@ -15,14 +15,13 @@ export const getAllUsers = async () => {
         updated_at: user.updatedAt,
       })
       .from(user);
-
   } catch (error) {
     logger.error('Error getting users', error);
     throw error;
   }
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async id => {
   try {
     const [foundUser] = await db
       .select({
@@ -82,7 +81,7 @@ export const updateUser = async (id, updates) => {
   }
 };
 
-export const deleteUser = async (id) => {
+export const deleteUser = async id => {
   try {
     // Check if user exists
     const [existingUser] = await db
@@ -96,11 +95,11 @@ export const deleteUser = async (id) => {
     }
 
     // Delete the user
-    await db
-      .delete(user)
-      .where(eq(user.id, id));
+    await db.delete(user).where(eq(user.id, id));
 
-    logger.info(`User with ID ${id} (${existingUser.email}) deleted successfully`);
+    logger.info(
+      `User with ID ${id} (${existingUser.email}) deleted successfully`
+    );
     return { id: existingUser.id, email: existingUser.email };
   } catch (error) {
     logger.error('Error deleting user', error);

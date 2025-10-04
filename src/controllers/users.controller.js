@@ -44,7 +44,7 @@ export const fetchUserById = async (req, res, next) => {
 
     res.json({
       message: 'Successfully retrieved user',
-      user: userdata
+      user: userdata,
     });
   } catch (e) {
     logger.error('Error fetching user by ID', e);

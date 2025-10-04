@@ -1,0 +1,145 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    env:
+      NODE_ENV: test
+      NODE_OPTIONS: --experimental-vm-modules
+      DATABASE_URL: postgresql://test:test@localhost:5432/acquisitions_test
+      JWT_SECRET: test_jwt_secret_key
+      
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: acquisitions_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup database
+        run: |
+          echo "Setting up test database..."
+          # Wait for PostgreSQL to be ready
+          until pg_isready -h localhost -p 5432 -U test; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL is ready!"
+
+      - name: Run database migrations
+        run: |
+          echo "Running database migrations..."
+          npm run db:generate
+          npm run db:migrate
+        continue-on-error: true
+
+      - name: Run tests
+        id: test-run
+        run: |
+          echo "Running tests..."
+          set +e  # Don't exit on test failures
+          npm test
+          TEST_EXIT_CODE=$?
+          echo "test_exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          if [ $TEST_EXIT_CODE -ne 0 ]; then
+            echo "❌ Some tests failed!"
+            echo "::error::Test suite failed with exit code $TEST_EXIT_CODE"
+          else
+            echo "✅ All tests passed!"
+          fi
+          
+          exit $TEST_EXIT_CODE
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: coverage/
+          retention-days: 30
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            coverage/
+            *.log
+            logs/
+          retention-days: 30
+
+      - name: Generate test summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.test-run.outputs.test_exit_code }}" = "0" ]; then
+            echo "✅ **Status**: All tests passed!" >> $GITHUB_STEP_SUMMARY
+            echo "🎉 **Result**: Test suite completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status**: Some tests failed" >> $GITHUB_STEP_SUMMARY
+            echo "🔍 **Action Required**: Check the test output above for details" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Coverage Information" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "coverage/lcov-report/index.html" ]; then
+            echo "📋 Coverage reports have been generated and uploaded as artifacts" >> $GITHUB_STEP_SUMMARY
+            echo "📁 **Artifact Name**: \`coverage-reports\`" >> $GITHUB_STEP_SUMMARY
+            echo "⏰ **Retention**: 30 days" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No coverage reports found" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Next Steps" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.test-run.outputs.test_exit_code }}" != "0" ]; then
+            echo "1. Review failed test output above" >> $GITHUB_STEP_SUMMARY
+            echo "2. Fix failing tests locally:" >> $GITHUB_STEP_SUMMARY
+            echo "   \`\`\`bash" >> $GITHUB_STEP_SUMMARY
+            echo "   npm test" >> $GITHUB_STEP_SUMMARY
+            echo "   \`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "3. Push your changes to re-run tests" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Tests are passing! Ready for deployment." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Annotate test failures
+        if: failure() && steps.test-run.outputs.test_exit_code != '0'
+        run: |
+          echo "::error::Test suite failed. Please review the test output above and fix failing tests."
+          echo "::error::Run 'npm test' locally to reproduce the failures."
+          echo "::notice::Coverage reports are available in the artifacts section for detailed analysis."

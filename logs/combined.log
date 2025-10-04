@@ -123,3 +123,6 @@
 {"level":"info","message":"::1 - - [03/Oct/2025:08:56:30 +0000] \"GET /health HTTP/1.1\" 200 51 \"-\" \"HTTPie\"","service":"acquisitions-api","timestamp":"2025-10-03T08:56:30.824Z"}
 {"level":"info","message":"::1 - - [03/Oct/2025:14:15:41 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"HTTPie\"","service":"acquisitions-api","timestamp":"2025-10-03T14:15:41.830Z"}
 {"level":"info","message":"::1 - - [03/Oct/2025:14:15:44 +0000] \"GET /health HTTP/1.1\" 200 74 \"-\" \"HTTPie\"","service":"acquisitions-api","timestamp":"2025-10-03T14:15:44.799Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [04/Oct/2025:08:14:16 +0000] \"GET /health HTTP/1.1\" 200 165 \"-\" \"-\"","service":"acquisitions-api","timestamp":"2025-10-04T08:14:16.172Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [04/Oct/2025:08:14:16 +0000] \"GET /api HTTP/1.1\" 200 41 \"-\" \"-\"","service":"acquisitions-api","timestamp":"2025-10-04T08:14:16.242Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [04/Oct/2025:08:14:16 +0000] \"GET /nonexistent HTTP/1.1\" 404 27 \"-\" \"-\"","service":"acquisitions-api","timestamp":"2025-10-04T08:14:16.300Z"}
